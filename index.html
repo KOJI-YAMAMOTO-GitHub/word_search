@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>テキスト検索ツール</title>
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 30px;
+  background-color: #f4f6f8;
+}
+textarea {
+  width: 90%;
+  padding: 8px;
+  font-size: 14px;
+}
+button {
+  padding: 8px 16px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+#result {
+  white-space: pre-wrap; /* 改行を保持して表示 */
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #fff;
+}
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<h2>テキスト検索ツール</h2>
+
+<label for="textInput">検索対象のテキスト：</label><br>
+<textarea id="textInput" rows="10" placeholder="ここに検索対象の文章を入力してください"></textarea><br><br>
+
+<label for="searchInput">検索キーワード（改行で複数指定可）：</label><br>
+<textarea id="searchInput" rows="5" placeholder="例：&#10;りんご&#10;バナナ"></textarea><br><br>
+
+<button onclick="searchAndHighlight()">検索実行</button>
+
+<h3>検索結果：</h3>
+<div id="result"></div>
+
+<script>
+function searchAndHighlight() {
+  const text = document.getElementById('textInput').value;
+  const searchTerms = document.getElementById('searchInput').value
+    .split(/\r?\n/)       // 改行で区切る
+    .map(s => s.trim())   // 前後の空白を除去
+    .filter(s => s !== ""); // 空行を除外
+
+  const lines = text.split(/\r?\n/);
+  const matchedLines = [];
+
+  lines.forEach(line => {
+    const lineLower = line.toLowerCase();
+    const hasMatch = searchTerms.some(term => lineLower.includes(term.toLowerCase()));
+    if (hasMatch) {
+      let highlightedLine = line;
+      searchTerms.forEach(term => {
+        const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); // 部分一致・大文字小文字区別なし
+        highlightedLine = highlightedLine.replace(regex, match => `<span class="highlight">${match}</span>`);
+      });
+      matchedLines.push(highlightedLine);
+    }
+  });
+
+  document.getElementById('result').innerHTML = matchedLines.length > 0
+    ? matchedLines.join('\n')
+    : '<em>該当する行が見つかりませんでした。</em>';
+}
+</script>
+
+</body>
+</html>
